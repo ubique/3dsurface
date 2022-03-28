@@ -11,8 +11,8 @@ int main() {
 	using namespace xyz;
 
 	ConfBufferValue conf_buffer_value;
-	conf_buffer_value.x = 3;
-	conf_buffer_value.y = 3;
+	conf_buffer_value.x = 100;
+	conf_buffer_value.y = 100;
 
 	std::vector<float> values[3];
 	std::array<void *, 3> buffers;

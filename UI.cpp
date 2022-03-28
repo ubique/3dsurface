@@ -2,6 +2,8 @@
 
 #include <atomic>
 #include <cassert>
+#include <chrono>
+#include <thread>
 
 namespace xyz {
 
@@ -19,7 +21,7 @@ void UI::init (const ConfBufferValue &conf_buffer_value) {
 	assert (!window_);
 
 	glfwInit();
-        window_ = glfwCreateWindow(800, 600, "3dsurface", nullptr, nullptr);
+        window_ = glfwCreateWindow(1024, 768, "3dsurface", nullptr, nullptr);
         glfwMakeContextCurrent(window_);
         gl3wInit();
 
@@ -33,6 +35,8 @@ void UI::display() {
 		glfwSwapBuffers(window_);
 		glfwPollEvents();
 		triple_buffer_->switch_consumer_buffer ();
+
+		// std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 
 	stopped_.store (true, std::memory_order_release);

@@ -26,10 +26,12 @@ class Grid {
   size_t num_vertices() const;
 
  private:
+   enum { VertexBuffer, ColorBuffer, NumBuffers };
+
+ private:
   const size_t x_;
   const size_t y_;
-  GLuint vertices_buffer_{0};
-  GLuint colors_buffer_{0};
+  std::vector<GLuint> buffers_;
   std::vector<std::array<std::array<float, 2>, 3>> vertices_;
   std::vector<std::array<std::array<float, 4>, 3>> colors_;
 };

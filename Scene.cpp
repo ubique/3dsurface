@@ -21,17 +21,14 @@ Scene::~Scene() {
 
 void Scene::init (const ConfBufferValue &conf_buffer_value) {
 	glGenVertexArrays(vao_.size (), vao_.data());
-	grid_.init (vao_.data ());
 
 	load_shaders ();
 	conf_buffer_.init(program_, conf_buffer_value);
 
 	glUseProgram(program_);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glEnableVertexAttribArray(1);
+	glBindVertexArray(vao_[0]);
+	grid_.init (vao_.data ());
 }
 
 void Scene::display(float *values) {
@@ -39,7 +36,6 @@ void Scene::display(float *values) {
 
 	glClearBufferfv(GL_COLOR, 0, black);
 	grid_.display (values);
-	glBindVertexArray(vao_[0]);
 	glDrawArrays( GL_TRIANGLES, 0, grid_.num_vertices ());
 }
 

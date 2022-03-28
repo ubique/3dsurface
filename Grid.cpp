@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <cstring>
+#include <iterator>
 
 namespace xyz {
 
@@ -27,6 +28,7 @@ const std::array<std::array<float, 4>, 10> CLUT = {{
 Grid::Grid(size_t x, size_t y) : x_(x), y_(y) {
 	vertices_.resize (x_ * y_);
 	colors_.resize (x_ * y_);
+	buffers_.resize (NumBuffers, 0);
 }
 
 Grid::Grid(Grid&& other) : x_(other.x_), y_(other.y_) {
@@ -34,17 +36,13 @@ Grid::Grid(Grid&& other) : x_(other.x_), y_(other.y_) {
 }
 
 Grid::~Grid() {
-	if (vertices_buffer_) {
-		glDeleteBuffers(1, &vertices_buffer_);
-	}
-	if (colors_buffer_) {
-		glDeleteBuffers(1, &colors_buffer_);
+	if (!buffers_.empty()) {
+		glDeleteBuffers(buffers_.size(), buffers_.data());
 	}
 }
 
 Grid& Grid::operator=(Grid&& other) {
-	vertices_buffer_ = std::exchange(other.vertices_buffer_, 0);
-	colors_buffer_ = std::exchange(other.colors_buffer_, 0);
+	buffers_ = std::move (other.buffers_);
 	vertices_ = std::move (other.vertices_);
 	colors_ = std::move (other.colors_);
 
@@ -76,15 +74,17 @@ void Grid::init(GLuint* array) {
 	}
   }
 
-  glCreateBuffers(1, &vertices_buffer_);
-  glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer_);
+  glCreateBuffers(buffers_.size (), buffers_.data ());
+
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers_[VertexBuffer]);
   glBufferData(GL_ARRAY_BUFFER, x_ * y_ * sizeof (decltype(vertices_)::value_type), vertices_.data(), GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-  glCreateBuffers(1, &colors_buffer_);
-  glBindBuffer(GL_ARRAY_BUFFER, colors_buffer_);
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers_[ColorBuffer]);
   glBufferData(GL_ARRAY_BUFFER, x_ * y_ * sizeof (decltype(colors_)::value_type), colors_.data(), GL_DYNAMIC_DRAW);
-
-  glBindVertexArray (array[0]);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 void Grid::display(float *values) {
@@ -94,20 +94,28 @@ void Grid::display(float *values) {
 		for (size_t y = 0; y < y_; ++y) {
 			const size_t index = x * x_ + y;
 			const float value = values[index];
-			const float vindex = std::clamp(
-			    static_cast<int>(floor(value / 0.1)), 0, 9);
+			const float nvalue = std::clamp(static_cast<int>(floor(value / 0.1f)), 0, 9);
 
 			vertices_[index][2][1] =
 			    height * value + vertices_[index][1][1];
-			colors_[index][2] = CLUT[vindex];
+
+			colors_[index][2] = CLUT[nvalue];
 		}
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertices_buffer_);
-	glBufferData(GL_ARRAY_BUFFER, x_ * y_ * sizeof (decltype(vertices_)::value_type), vertices_.data(), GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers_[VertexBuffer]);
+	glBufferData(GL_ARRAY_BUFFER,
+		     x_ * y_ * sizeof(decltype(vertices_)::value_type),
+		     vertices_.data(), GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-	glBindBuffer(GL_ARRAY_BUFFER, colors_buffer_);
-	glBufferData(GL_ARRAY_BUFFER, x_ * y_ * sizeof (decltype(colors_)::value_type), colors_.data(), GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, buffers_[ColorBuffer]);
+	glBufferData(GL_ARRAY_BUFFER,
+		     x_ * y_ * sizeof(decltype(colors_)::value_type),
+		     colors_.data(), GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 size_t Grid::num_vertices() const {
