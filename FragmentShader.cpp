@@ -6,7 +6,7 @@ namespace xyz {
 
 namespace {
 
-const GLchar * kSrc = R"tag(
+const GLchar *kSrc = R"tag(
 #version 450 core
 
 in vec4 vs_color;
@@ -21,7 +21,7 @@ void main()
 } // namespace
 
 GLuint FragmentShader::load() {
-	return Shader::load (GL_FRAGMENT_SHADER, &kSrc);
+  return Shader::load(GL_FRAGMENT_SHADER, &kSrc);
 }
 
 } // namespace xyz

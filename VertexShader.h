@@ -6,7 +6,7 @@ namespace xyz {
 
 class VertexShader {
 public:
-	static GLuint load();
+  static GLuint load();
 };
 
 } // namespace xyz

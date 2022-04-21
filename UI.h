@@ -12,20 +12,24 @@ namespace xyz {
 
 class UI {
 public:
-	UI(TripleBuffer *triple_buffer, Scene scene);
-	~UI();
+  static constexpr int height{1024};
+  static constexpr int width{768};
 
-	bool has_stopped () { return stopped_.load(std::memory_order_acquire); }
+public:
+  UI(TripleBuffer *triple_buffer, Scene scene);
+  ~UI();
 
-	void init (const ConfBufferValue &conf_buffer_value);
-	void display();
+  bool has_stopped() { return stopped_.load(std::memory_order_acquire); }
+
+  void init(const ConfBufferValue &conf_buffer_value);
+  void display();
 
 private:
-	ConfBuffer conf_buffer_;
-	TripleBuffer *triple_buffer_;
-	Scene scene_;
-	GLFWwindow *window_{nullptr};
-	std::atomic<bool> stopped_;
+  ConfBuffer conf_buffer_;
+  TripleBuffer *triple_buffer_;
+  Scene scene_;
+  GLFWwindow *window_{nullptr};
+  std::atomic<bool> stopped_;
 };
 
 } // namespace xyz

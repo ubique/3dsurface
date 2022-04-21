@@ -6,7 +6,7 @@ namespace xyz {
 
 class Shader {
 public:
-	static GLuint load(GLenum type, const GLchar **src);
+  static GLuint load(GLenum type, const GLchar **src);
 };
 
 } // namespace xyz

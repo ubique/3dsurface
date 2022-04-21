@@ -6,7 +6,7 @@ namespace xyz {
 
 class FragmentShader {
 public:
-	static GLuint load();
+  static GLuint load();
 };
 
 } // namespace xyz
