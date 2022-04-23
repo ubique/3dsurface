@@ -13,10 +13,10 @@
 int main() {
   using namespace xyz;
 
-  Vec4F v(0.0f, 0.0f, 0.0f, 1.0f);
+  Vec4F v(0.9, 0.442435, -1.9, 0.0);
   std::cout << "v: " << v << std::endl;
 
-  Vec4F from(0.4f, 0.6f, 0.8f, 1.0f);
+  Vec4F from(0.0f, 0.0f, 1.0f, 0.0f);
   std::cout << "from: " << from << std::endl;
   Vec4F to(0.0f, 0.0f, 0.0f, 1.0f);
   std::cout << "to: " << to << std::endl;
@@ -26,12 +26,18 @@ int main() {
   std::cout << camera.cam_to_world() << std::endl;
   std::cout << "WorldToCam:" << std::endl;
   std::cout << camera.world_to_cam() << std::endl;
+  std::cout << "Mprojection:" << std::endl;
+  std::cout << camera.m_projection() << std::endl;
 
-  std::cout << "v':" << camera.cam_to_world() * v << std::endl;
+  std::cout << "v':" << (camera.world_to_cam() * v) << std::endl;
+  std::cout << "v'':" << camera.m_projection() * (camera.world_to_cam() * v)
+            << std::endl;
+
+  // return 0;
 
   ConfBufferValue conf_buffer_value;
-  conf_buffer_value.x = 25;
-  conf_buffer_value.y = 25;
+  conf_buffer_value.x = 5;
+  conf_buffer_value.y = 5;
 
   std::vector<float> values[3];
   std::array<void *, 3> buffers;

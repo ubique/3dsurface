@@ -18,6 +18,7 @@ class Vec4F {
 public:
   Vec4F() : Vec4F(0.0f, 0.0f, 0.0f, 0.0f) {}
   Vec4F(__m128 values) : values_(values) {}
+  Vec4F(float x, float y, float z) : Vec4F(x, y, z, 1.0f) {}
   Vec4F(float x, float y, float z, float w) {
     values_ = _mm_setr_ps(x, y, z, w);
   }

@@ -6,6 +6,8 @@
 
 #include "GL/gl3w.h"
 
+#include "Mat.h"
+
 namespace xyz {
 
 class Grid {
@@ -22,7 +24,7 @@ public:
   Grid &operator=(Grid &&other);
 
   void init(GLuint *array);
-  void display(float *values);
+  void display(float *values, const Mat44F &m_proj, const Mat44F &m_view);
   size_t num_vertices() const;
 
 private:

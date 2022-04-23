@@ -33,7 +33,7 @@ public:
     return Vec4F(rows_[i]);
   }
 
-  void storeu(float (&values)[4][4]) {
+  void storeu(float (&values)[4][4]) const {
     _mm_storeu_ps(values[0], rows_[0]);
     _mm_storeu_ps(values[1], rows_[1]);
     _mm_storeu_ps(values[2], rows_[2]);
@@ -41,7 +41,7 @@ public:
   }
 
   void transpose() {
-	_MM_TRANSPOSE4_PS (rows_[0], rows_[1], rows_[2], rows_[3]);
+    _MM_TRANSPOSE4_PS(rows_[0], rows_[1], rows_[2], rows_[3]);
   }
 
 private:

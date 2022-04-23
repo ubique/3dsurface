@@ -13,6 +13,7 @@ layout( location = 0 ) in vec4 vPosition;
 layout( location = 1 ) in vec4 vColor;
 
 uniform mat4 m_view;
+uniform mat4 m_proj;
 
 out vec4 vs_color;
 
@@ -20,8 +21,7 @@ void
 main()
 {
     vs_color = vColor;
-    gl_Position = m_view * vPosition;
-    // gl_Position = vPosition;
+    gl_Position = m_proj * (m_view * vPosition);
 }
 )tag";
 

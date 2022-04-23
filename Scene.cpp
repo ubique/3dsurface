@@ -32,6 +32,7 @@ void Scene::init(const ConfBufferValue &conf_buffer_value) {
   grid_.init(vao_.data());
 
   m_view_ = glGetUniformLocation(program_, "m_view");
+  m_proj_ = glGetUniformLocation(program_, "m_proj");
 
   last_time_ = glfwGetTime();
 }
@@ -44,20 +45,21 @@ void Scene::display(GLFWwindow *window, float *values) {
   read_keabord(window);
   camera_.look_at(from_, to_);
 
-  std::cout << "Delta: " << delta_ << std::endl;
-  std::cout << "From: " << from_ << std::endl;
-  to_ = camera_.cam_to_world () * to_;
-  from_ = camera_.cam_to_world () * delta_;
-  std::cout << "From: " << from_ << std::endl;
+  to_ = camera_.cam_to_world() * (from_ + to_);
+  from_ = camera_.cam_to_world() * delta_;
 
   alignas(16) GLfloat m_view[4][4];
   camera_.world_to_cam().storeu(m_view);
-  glUniformMatrix4fv(m_view_, 1, GL_FALSE, &m_view[0][0]);
+  glUniformMatrix4fv(m_view_, 1, GL_TRUE, &m_view[0][0]);
 
-  //glClearBufferfv(GL_COLOR, 0, black);
+  alignas(16) GLfloat m_proj[4][4];
+  camera_.m_projection().storeu(m_proj);
+  glUniformMatrix4fv(m_proj_, 1, GL_TRUE, &m_proj[0][0]);
+
+  // glClearBufferfv(GL_COLOR, 0, black);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  grid_.display(values);
+  grid_.display(values, camera_.m_projection(), camera_.world_to_cam());
   glDrawArrays(GL_TRIANGLES, 0, grid_.num_vertices());
 
   last_time_ = glfwGetTime();
@@ -99,23 +101,20 @@ void Scene::read_mouse(GLFWwindow *window) {
 
 void Scene::read_keabord(GLFWwindow *window) {
   alignas(16) float delta[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-  const float speed = 10.0f;
+  const float speed = 20.0f;
 
-  // Move forward
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     delta[2] -= delta_time_ * speed;
   }
 
-  // Move backward
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
     delta[2] += delta_time_ * speed;
   }
 
-  // Strafe right
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
     delta[0] += delta_time_ * speed;
   }
-  // Strafe left
+
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
     delta[0] -= delta_time_ * speed;
   }

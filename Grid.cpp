@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <cstring>
+#include <iostream>
 #include <iterator>
 
 namespace xyz {
@@ -12,6 +13,8 @@ namespace {
 
 constexpr float ndc_width = 2.0f;
 constexpr float ndc_height = 2.0f;
+constexpr float y_base = -0.5f;
+constexpr float z_base = 1.0f;
 
 const std::array<std::array<float, 4>, 10> CLUT = {{
     {0.10f, 0.12f, 0.80f, 1.0f},
@@ -59,13 +62,14 @@ void Grid::init(GLuint *array) {
 
   float x = -1.0f;
   for (size_t i = 0; i < i_; ++i) {
-    float z = 0.0f;
+    float z = z_base;
+
     for (size_t j = 0; j < j_; ++j) {
       const size_t index = i * i_ + j;
 
-      vertices_[index][0] = {x, 0.0f, z};
-      vertices_[index][1] = {x + width, 0.0f, z};
-      vertices_[index][2] = {x + hwidth, height, z};
+      vertices_[index][0] = {x, y_base, z};
+      vertices_[index][1] = {x + width, y_base, z};
+      vertices_[index][2] = {x + hwidth, y_base + height, z};
 
       colors_[index][0] = CLUT[0];
       colors_[index][1] = CLUT[0];
@@ -91,7 +95,7 @@ void Grid::init(GLuint *array) {
   glVertexAttribPointer(1, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
-void Grid::display(float *values) {
+void Grid::display(float *values, const Mat44F &m_proj, const Mat44F &m_view) {
   for (size_t i = 0; i < i_; ++i) {
     for (size_t j = 0; j < j_; ++j) {
       const size_t index = i * i_ + j;
@@ -99,7 +103,7 @@ void Grid::display(float *values) {
       const float nvalue =
           std::clamp(static_cast<int>(floor(value / 0.1f)), 0, 9);
 
-      vertices_[index][2][1] = value;
+      vertices_[index][2][1] = y_base + value;
       colors_[index][2] = CLUT[nvalue];
     }
   }

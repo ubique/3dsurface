@@ -32,10 +32,11 @@ private:
 private:
   GLuint program_;
   GLint m_view_;
+  GLint m_proj_;
   double last_time_;
   double delta_time_;
   Vec4F from_{0.0f, 0.0f, 0.0f, 1.0f};
-  Vec4F to_{0.0f, 0.0f, -1.0f, 1.0f};
+  Vec4F to_{0.0f, 0.0f, 1.0f, 1.0f};
   Vec4F delta_;
   double h_angle_{0.0};
   double v_angle_{0.0};
