@@ -28,8 +28,9 @@ Scene::~Scene() {
 }
 
 void Scene::init(GLFWwindow *window, const ConfBufferValue &conf_buffer_value) {
-  // glEnable(GL_BLEND);
+  glEnable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);
+
   glGenVertexArrays(vao_.size(), vao_.data());
 
   glfwSetCursorPosCallback(window,
@@ -72,7 +73,7 @@ void Scene::display(GLFWwindow *window, float *values) {
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  grid_.display(values, camera_.m_projection(), camera_.world_to_cam());
+  grid_.display(values);
   glDrawArrays(GL_TRIANGLES, 0, grid_.num_vertices());
 
   last_time_ = glfwGetTime();

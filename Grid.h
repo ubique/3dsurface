@@ -24,7 +24,7 @@ public:
   Grid &operator=(Grid &&other);
 
   void init(GLuint *array);
-  void display(float *values, const Mat44F &m_proj, const Mat44F &m_view);
+  void display(float *values);
   size_t num_vertices() const;
 
 private:
@@ -35,6 +35,7 @@ private:
   using ColorType = std::array<float, ColorComponents>;
   using TriangleVertices = std::array<VertexType, 3>;
   using TriangleColors = std::array<ColorType, 3>;
+  static constexpr size_t TrianglesInPyramide{4};
 
 private:
   const size_t i_;

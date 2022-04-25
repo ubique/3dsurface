@@ -32,8 +32,8 @@ const std::array<std::array<float, 4>, 10> CLUT = {{
 } // namespace
 
 Grid::Grid(size_t i, size_t j) : i_(i), j_(j) {
-  vertices_.resize(i_ * j_);
-  colors_.resize(i_ * j_);
+  vertices_.resize(i_ * j_ * TrianglesInPyramide);
+  colors_.resize(i_ * j_ * TrianglesInPyramide);
   buffers_.resize(NumBuffers, 0);
 }
 
@@ -65,15 +65,39 @@ void Grid::init(GLuint *array) {
     float z = z_base;
 
     for (size_t j = 0; j < j_; ++j) {
-      const size_t index = i * i_ + j;
+      const size_t index = (i * i_ + j) * TrianglesInPyramide;
 
-      vertices_[index][0] = {x, y_base, z};
-      vertices_[index][1] = {x + width, y_base, z};
-      vertices_[index][2] = {x + hwidth, y_base + height, z};
+      vertices_[index + 0][0] = {x, y_base, z};
+      vertices_[index + 0][1] = {x + width, y_base, z};
+      vertices_[index + 0][2] = {x + hwidth, y_base + height, z + hwidth};
 
-      colors_[index][0] = CLUT[0];
-      colors_[index][1] = CLUT[0];
-      colors_[index][2] = CLUT[9];
+      vertices_[index + 1][0] = {x + width, y_base, z};
+      vertices_[index + 1][1] = {x + width, y_base, z + width};
+      vertices_[index + 1][2] = {x + hwidth, y_base + height, z + hwidth};
+
+      vertices_[index + 2][0] = {x, y_base, z + width};
+      vertices_[index + 2][1] = {x + width, y_base, z + width};
+      vertices_[index + 2][2] = {x + hwidth, y_base + height, z + hwidth};
+
+      vertices_[index + 3][0] = {x, y_base, z + width};
+      vertices_[index + 3][1] = {x, y_base, z};
+      vertices_[index + 3][2] = {x + hwidth, y_base + height, z + hwidth};
+
+      colors_[index + 0][0] = CLUT[0];
+      colors_[index + 0][1] = CLUT[0];
+      colors_[index + 0][2] = CLUT[9];
+
+      colors_[index + 1][0] = CLUT[0];
+      colors_[index + 1][1] = CLUT[0];
+      colors_[index + 1][2] = CLUT[9];
+
+      colors_[index + 2][0] = CLUT[0];
+      colors_[index + 2][1] = CLUT[0];
+      colors_[index + 2][2] = CLUT[9];
+
+      colors_[index + 3][0] = CLUT[0];
+      colors_[index + 3][1] = CLUT[0];
+      colors_[index + 3][2] = CLUT[9];
 
       z += width;
     }
@@ -84,43 +108,57 @@ void Grid::init(GLuint *array) {
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[VertexBuffer]);
-  glBufferData(GL_ARRAY_BUFFER, i_ * j_ * sizeof(TriangleVertices),
+  glBufferData(GL_ARRAY_BUFFER,
+               i_ * j_ * TrianglesInPyramide * sizeof(TriangleVertices),
                vertices_.data(), GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, VertexComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[ColorBuffer]);
-  glBufferData(GL_ARRAY_BUFFER, i_ * j_ * sizeof(TriangleColors),
+  glBufferData(GL_ARRAY_BUFFER,
+               i_ * j_ * TrianglesInPyramide * sizeof(TriangleColors),
                colors_.data(), GL_DYNAMIC_DRAW);
   glVertexAttribPointer(1, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
-void Grid::display(float *values, const Mat44F &m_proj, const Mat44F &m_view) {
+void Grid::display(float *values) {
   for (size_t i = 0; i < i_; ++i) {
     for (size_t j = 0; j < j_; ++j) {
-      const size_t index = i * i_ + j;
-      const float value = values[index];
+      const size_t index = (i * i_ + j) * TrianglesInPyramide;
+
+      const float value = values[i * i_ + j];
       const float nvalue =
           std::clamp(static_cast<int>(floor(value / 0.1f)), 0, 9);
 
-      vertices_[index][2][1] = y_base + value;
-      colors_[index][2] = CLUT[nvalue];
+      vertices_[index + 0][2][1] = y_base + value;
+      vertices_[index + 1][2][1] = y_base + value;
+      vertices_[index + 2][2][1] = y_base + value;
+      vertices_[index + 3][2][1] = y_base + value;
+
+      colors_[index + 0][2] = CLUT[nvalue];
+      colors_[index + 1][2] = CLUT[nvalue];
+      colors_[index + 2][2] = CLUT[nvalue];
+      colors_[index + 3][2] = CLUT[nvalue];
     }
   }
 
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[VertexBuffer]);
-  glBufferData(GL_ARRAY_BUFFER, i_ * j_ * sizeof(TriangleVertices),
+  glBufferData(GL_ARRAY_BUFFER,
+               i_ * j_ * TrianglesInPyramide * sizeof(TriangleVertices),
                vertices_.data(), GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, VertexComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[ColorBuffer]);
-  glBufferData(GL_ARRAY_BUFFER, i_ * j_ * sizeof(TriangleColors),
+  glBufferData(GL_ARRAY_BUFFER,
+               i_ * j_ * TrianglesInPyramide * sizeof(TriangleColors),
                colors_.data(), GL_DYNAMIC_DRAW);
   glVertexAttribPointer(1, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
-size_t Grid::num_vertices() const { return vertices_.size() * 3; }
+size_t Grid::num_vertices() const {
+  return vertices_.size() * TrianglesInPyramide * 3;
+}
 
 } // namespace xyz
