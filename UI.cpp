@@ -22,10 +22,11 @@ void UI::init(const ConfBufferValue &conf_buffer_value) {
 
   glfwInit();
   window_ = glfwCreateWindow(height, width, "3dsurface", nullptr, nullptr);
+  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwMakeContextCurrent(window_);
   gl3wInit();
 
-  scene_.init(conf_buffer_value);
+  scene_.init(window_, conf_buffer_value);
 }
 
 void UI::display() {

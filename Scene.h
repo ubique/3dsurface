@@ -21,7 +21,7 @@ public:
   Scene &operator=(const Scene &) = delete;
   Scene &operator=(Scene &&) = default;
 
-  void init(const ConfBufferValue &conf_buffer_value);
+  void init(GLFWwindow *window, const ConfBufferValue &conf_buffer_value);
   void display(GLFWwindow *window, float *values);
 
 private:
@@ -40,6 +40,11 @@ private:
   Vec4F delta_;
   double h_angle_{0.0};
   double v_angle_{0.0};
+  float last_x_pos_;
+  float last_y_pos_;
+  float pitch_{0.0f};
+  ;
+  float yaw_{0.0f};
   Camera camera_;
   ConfBuffer conf_buffer_;
   std::vector<GLuint> vao_;

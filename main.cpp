@@ -36,8 +36,8 @@ int main() {
   // return 0;
 
   ConfBufferValue conf_buffer_value;
-  conf_buffer_value.x = 5;
-  conf_buffer_value.y = 5;
+  conf_buffer_value.x = 50;
+  conf_buffer_value.y = 50;
 
   std::vector<float> values[3];
   std::array<void *, 3> buffers;

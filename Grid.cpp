@@ -13,7 +13,7 @@ namespace {
 
 constexpr float ndc_width = 2.0f;
 constexpr float ndc_height = 2.0f;
-constexpr float y_base = -0.5f;
+constexpr float y_base = -1.0f;
 constexpr float z_base = 1.0f;
 
 const std::array<std::array<float, 4>, 10> CLUT = {{

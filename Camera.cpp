@@ -28,31 +28,29 @@ void Camera::look_at(Vec4F from, Vec4F to) {
   from_ = from;
   to_ = to;
 
-  auto forward = normalise(to_ - from_);
+  forward_ = normalise(to_ - from_);
 
-  Vec4F right;
-
-  if (forward == randomV) {
-    right = normalise(cross(forward, randomV2));
+  if (forward_ == randomV) {
+    right_ = normalise(cross(forward_, randomV2));
   } else {
-    right = normalise(cross(forward, randomV));
+    right_ = normalise(cross(forward_, randomV));
   }
 
-  auto up = normalise(cross(right, forward));
+  up_ = normalise(cross(right_, forward_));
 
-  cam_to_world_ = Mat44F(right, up, forward, from_);
+  cam_to_world_ = Mat44F(right_, up_, forward_, from_);
   cam_to_world_.transpose();
 
-  forward.negate();
-
   alignas(16) float right_values[4];
-  right.storeu(right_values);
-  right_values[3] = -dot(right, from_);
+  right_.storeu(right_values);
+  right_values[3] = -dot(right_, from_);
 
   alignas(16) float up_values[4];
-  up.storeu(up_values);
-  up_values[3] = -dot(up, from_);
+  up_.storeu(up_values);
+  up_values[3] = -dot(up_, from_);
 
+  auto forward = forward_;
+  forward.negate();
   alignas(16) float forward_values[4];
   forward.storeu(forward_values);
   forward_values[3] = -dot(forward, from_);
@@ -74,13 +72,6 @@ void Camera::compute_projection() {
   Vec4F row_2(0.0f, 0.0f, -(far_ + near_) / (far_ - near_),
               -2.0f * far_ * near_ / (far_ - near_));
   Vec4F row_3(0.0f, 0.0f, -1.0f, 0.0f);
-
-#if 0
-	Vec4F row_0 (1.0f, 0.0f, 0.0f, 0.0f);
-	Vec4F row_1 (0.0f, 1.0f, 0.0f, 0.0f);
-	Vec4F row_2 (0.0f, 0.0f, -1.0f, -1.0f);
-	Vec4F row_3 (0.0f, 0.0f, -1.0f, 0.0f);
-#endif
 
   m_projection_ = Mat44F(row_0, row_1, row_2, row_3);
 }

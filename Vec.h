@@ -11,9 +11,7 @@
 namespace xyz {
 
 class Mat44F;
-
 static_assert(alignof(__m128) == 16, "Unexpected alignment for __m128");
-
 class Vec4F {
 public:
   Vec4F() : Vec4F(0.0f, 0.0f, 0.0f, 0.0f) {}
@@ -110,6 +108,10 @@ static inline Vec4F operator-(Vec4F x, Vec4F y) {
 
   return x;
 }
+
+static inline Vec4F operator*(Vec4F x, float v) { return x.as_native() * v; }
+
+static inline Vec4F operator*(float v, Vec4F x) { return x.as_native() * v; }
 
 static inline Vec4F normalise(Vec4F x) {
   x.normalise();

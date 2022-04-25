@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -10,6 +11,14 @@
 
 namespace xyz {
 
+namespace {
+
+double G_x_pos{UI::width / 2.0f};
+double G_y_pos{UI::height / 2.0f};
+bool G_has_seen_mouse;
+
+} // namespace
+
 Scene::Scene(Grid grid) : grid_(std::move(grid)) { vao_.resize(Grid::num_vao); }
 
 Scene::~Scene() {
@@ -18,10 +27,16 @@ Scene::~Scene() {
   }
 }
 
-void Scene::init(const ConfBufferValue &conf_buffer_value) {
-  glEnable(GL_BLEND);
+void Scene::init(GLFWwindow *window, const ConfBufferValue &conf_buffer_value) {
+  // glEnable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);
   glGenVertexArrays(vao_.size(), vao_.data());
+
+  glfwSetCursorPosCallback(window,
+                           [](GLFWwindow *window, double xpos, double ypos) {
+                             G_x_pos = xpos;
+                             G_y_pos = ypos;
+                           });
 
   load_shaders();
   conf_buffer_.init(program_, conf_buffer_value);
@@ -38,15 +53,14 @@ void Scene::init(const ConfBufferValue &conf_buffer_value) {
 }
 
 void Scene::display(GLFWwindow *window, float *values) {
+  static int fps;
+  static int fps_time;
   const auto current_time_ = glfwGetTime();
   delta_time_ = current_time_ - last_time_;
 
   read_mouse(window);
   read_keabord(window);
-  camera_.look_at(from_, to_);
-
-  to_ = camera_.cam_to_world() * (from_ + to_);
-  from_ = camera_.cam_to_world() * delta_;
+  camera_.look_at(from_, from_ + to_);
 
   alignas(16) GLfloat m_view[4][4];
   camera_.world_to_cam().storeu(m_view);
@@ -56,13 +70,19 @@ void Scene::display(GLFWwindow *window, float *values) {
   camera_.m_projection().storeu(m_proj);
   glUniformMatrix4fv(m_proj_, 1, GL_TRUE, &m_proj[0][0]);
 
-  // glClearBufferfv(GL_COLOR, 0, black);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   grid_.display(values, camera_.m_projection(), camera_.world_to_cam());
   glDrawArrays(GL_TRIANGLES, 0, grid_.num_vertices());
 
   last_time_ = glfwGetTime();
+
+  ++fps;
+
+  if (last_time_ - fps_time > 1.0) {
+    fps = 0;
+    fps_time = last_time_;
+  }
 }
 
 void Scene::load_shaders() {
@@ -82,44 +102,53 @@ void Scene::load_shaders() {
 }
 
 void Scene::read_mouse(GLFWwindow *window) {
-  static double xpos_center{UI::height / 2.0};
-  static double ypos_center{UI::width / 2.0};
-  static double speed{10.0};
+  if (!G_has_seen_mouse) {
+    last_x_pos_ = G_x_pos;
+    last_y_pos_ = G_y_pos;
+    G_has_seen_mouse = true;
+  }
+  float x_offset = G_x_pos - last_x_pos_;
+  float y_offset = last_y_pos_ - G_y_pos;
+  last_x_pos_ = G_x_pos;
+  last_y_pos_ = G_y_pos;
 
-  double xpos, ypos;
+  constexpr float sensivity = 0.1;
+  x_offset *= sensivity;
+  y_offset *= sensivity;
 
-  glfwGetCursorPos(window, &xpos, &ypos);
-  glfwSetCursorPos(window, xpos_center, ypos_center);
+  yaw_ += x_offset;
+  pitch_ += y_offset;
 
-  h_angle_ += speed * delta_time_ * (xpos_center - xpos);
-  v_angle_ += speed * delta_time_ * (ypos_center - ypos);
+  pitch_ = std::clamp(pitch_, -89.0f, 89.0f);
 
-  Vec4F to(cos(v_angle_) * sin(h_angle_), sin(v_angle_),
-           cos(v_angle_) * cos(h_angle_), 1.0f);
-  to_ = to;
+  Vec4F to(cos(yaw_ * M_PI / 180.0f) * cos(pitch_ * M_PI / 180.0f),
+           sin(pitch_ * M_PI / 180.0f),
+           sin(yaw_ * M_PI / 180.0f) + cos(pitch_ * M_PI / 180.0f), 0.0f);
+
+  to_ = normalise(to);
 }
 
 void Scene::read_keabord(GLFWwindow *window) {
-  alignas(16) float delta[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-  const float speed = 20.0f;
+  const float speed = 50.00f;
+
+  const auto &forward = camera_.forward();
+  const auto &up = camera_.up();
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    delta[2] -= delta_time_ * speed;
+    from_ += delta_time_ * speed * forward;
   }
 
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    delta[2] += delta_time_ * speed;
+    from_ -= delta_time_ * speed * forward;
   }
 
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    delta[0] += delta_time_ * speed;
+    from_ += delta_time_ * speed * normalise(cross(forward, up));
   }
 
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    delta[0] -= delta_time_ * speed;
+    from_ -= delta_time_ * speed * normalise(cross(forward, up));
   }
-
-  delta_ = Vec4F(delta);
 }
 
 } // namespace xyz
