@@ -12,7 +12,7 @@ namespace xyz {
 class UI {
 public:
   static constexpr int height{1024};
-  static constexpr int width{768};
+  static constexpr int width{1024};
 
 public:
   UI(TripleBuffer *triple_buffer, Scene scene);

@@ -16,17 +16,23 @@ constexpr float ndc_height = 2.0f;
 constexpr float y_base = -1.0f;
 constexpr float z_base = 1.0f;
 
-const std::array<std::array<float, 4>, 10> CLUT = {{
-    {0.10f, 0.12f, 0.80f, 1.0f},
-    {0.20f, 0.14f, 0.70f, 1.0f},
-    {0.30f, 0.16f, 0.60f, 1.0f},
-    {0.40f, 0.18f, 0.50f, 1.0f},
-    {0.50f, 0.20f, 0.40f, 1.0f},
-    {0.60f, 0.22f, 0.30f, 1.0f},
-    {0.70f, 0.24f, 0.20f, 1.0f},
-    {0.80f, 0.26f, 0.10f, 1.0f},
-    {0.90f, 0.28f, 0.00f, 1.0f},
-    {1.00f, 0.30f, 0.00f, 1.0f},
+const std::array<std::array<float, 4>, 16> CLUT = {{
+	{0.050382f,0.029802f,0.527975f,1.0f},
+{0.200444f,0.017900f,0.593364f,1.0f},
+{0.312543f,0.008236f,0.635700f,1.0f},
+{0.417642f,0.000560f,0.658390f,1.0f},
+{0.517932f,0.021557f,0.654109f,1.0f},
+{0.610667f,0.090200f,0.619951f,1.0f},
+{0.692840f,0.165138f,0.564522f,1.0f},
+{0.764193f,0.240393f,0.502126f,1.0f},
+{0.826588f,0.315712f,0.441316f,1.0f},
+{0.881443f,0.392527f,0.383229f,1.0f},
+{0.928329f,0.472972f,0.326067f,1.0f},
+{0.965024f,0.559116f,0.268513f,1.0f},
+{0.988260f,0.652323f,0.211364f,1.0f},
+{0.994141f,0.753134f,0.161404f,1.0f},
+{0.977995f,0.861430f,0.142808f,1.0f},
+{0.940015f,0.975156f,0.131326f,1.0f},
 }};
 
 } // namespace
@@ -85,19 +91,19 @@ void Grid::init(GLuint *array) {
 
       colors_[index + 0][0] = CLUT[0];
       colors_[index + 0][1] = CLUT[0];
-      colors_[index + 0][2] = CLUT[9];
+      colors_[index + 0][2] = CLUT[15];
 
       colors_[index + 1][0] = CLUT[0];
       colors_[index + 1][1] = CLUT[0];
-      colors_[index + 1][2] = CLUT[9];
+      colors_[index + 1][2] = CLUT[15];
 
       colors_[index + 2][0] = CLUT[0];
       colors_[index + 2][1] = CLUT[0];
-      colors_[index + 2][2] = CLUT[9];
+      colors_[index + 2][2] = CLUT[15];
 
       colors_[index + 3][0] = CLUT[0];
       colors_[index + 3][1] = CLUT[0];
-      colors_[index + 3][2] = CLUT[9];
+      colors_[index + 3][2] = CLUT[15];
 
       z += width;
     }
@@ -128,7 +134,7 @@ void Grid::display(float *values) {
 
       const float value = values[i * j_ + j];
       const float nvalue =
-          std::clamp(static_cast<int>(floor(value / 0.1f)), 0, 9);
+          std::clamp(static_cast<int>(floor(value / (1.0f / 16))), 0, 15);
 
       vertices_[index + 0][2][1] = y_base + value;
       vertices_[index + 1][2][1] = y_base + value;

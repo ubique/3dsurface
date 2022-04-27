@@ -16,6 +16,7 @@ namespace {
 double G_x_pos{UI::width / 2.0f};
 double G_y_pos{UI::height / 2.0f};
 bool G_has_seen_mouse;
+double G_fov{90.0f};
 
 } // namespace
 
@@ -38,6 +39,10 @@ void Scene::init(GLFWwindow *window) {
                              G_x_pos = xpos;
                              G_y_pos = ypos;
                            });
+  glfwSetScrollCallback(window, [](GLFWwindow *window, double xoffset, double yoffset) {
+	G_fov -= yoffset;
+	G_fov = std::clamp(G_fov, 1.0, 90.0);
+  });
 
   load_shaders();
 
@@ -60,6 +65,7 @@ void Scene::display(GLFWwindow *window, float *values) {
 
   read_mouse(window);
   read_keabord(window);
+  camera_.set_fov(G_fov);
   camera_.look_at(from_, from_ + to_);
 
   alignas(16) GLfloat m_view[4][4];

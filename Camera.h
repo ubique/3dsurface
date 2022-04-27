@@ -10,6 +10,10 @@ public:
   Camera();
   Camera(Vec4F from, Vec4F to);
 
+  void set_fov(double fov) {
+    fov_ = fov;
+    compute_projection ();
+  }
   void look_at(Vec4F from, Vec4F to);
 
   const Mat44F &world_to_cam() const { return world_to_cam_; }
@@ -26,7 +30,7 @@ private:
   void compute_projection();
 
 private:
-  float fovy_{90.0f};
+  float fov_{90.0f};
   float near_{1.0f};
   float far_{10.0f};
   Vec4F from_;

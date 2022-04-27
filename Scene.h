@@ -34,7 +34,7 @@ private:
   GLint m_proj_;
   double last_time_;
   double delta_time_;
-  Vec4F from_{0.5f, 0.5f, 0.0f, 1.0f};
+  Vec4F from_{0.5f, 0.5f, -1.0f, 1.0f};
   Vec4F to_{0.0f, 0.0f, 1.0f, 1.0f};
   Vec4F delta_;
   double h_angle_{0.0};
@@ -42,8 +42,7 @@ private:
   float last_x_pos_;
   float last_y_pos_;
   float pitch_{0.0f};
-  ;
-  float yaw_{0.0f};
+  float yaw_{90.0f};
   Camera camera_;
   std::vector<GLuint> vao_;
   Grid grid_;

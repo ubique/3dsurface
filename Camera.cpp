@@ -61,7 +61,7 @@ void Camera::look_at(Vec4F from, Vec4F to) {
 
 void Camera::compute_projection() {
   const auto ratio = static_cast<double>(UI::width) / UI::height;
-  const auto scale = tan(fovy_ * 0.5 * M_PI / 180);
+  const auto scale = tan(fov_ * 0.5 * M_PI / 180);
   const auto r = ratio * scale;
   const auto l = -r;
   const auto t = scale;
