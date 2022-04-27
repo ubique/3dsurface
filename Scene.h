@@ -30,7 +30,7 @@ private:
   void read_keabord(GLFWwindow *window);
 
 private:
-  GLuint program_;
+  GLuint program_{0};
   GLint m_view_;
   GLint m_proj_;
   double last_time_;
