@@ -35,24 +35,23 @@ int main() {
 
   // return 0;
 
-  ConfBufferValue conf_buffer_value;
-  conf_buffer_value.x = 50;
-  conf_buffer_value.y = 50;
+  size_t x = 50;
+  size_t y = 50;
 
   std::vector<float> values[3];
   std::array<void *, 3> buffers;
 
   for (size_t i = 0; i < buffers.size(); ++i) {
-    values[i].resize(conf_buffer_value.x * conf_buffer_value.y);
+    values[i].resize(x * y);
     buffers[i] = values[i].data();
   }
 
   TripleBuffer triple_buffer(buffers);
 
-  UI ui(&triple_buffer, Scene(Grid(conf_buffer_value.x, conf_buffer_value.y)));
+  UI ui(&triple_buffer, Scene(Grid(x, y)));
 
   std::thread ui_thread([&]() {
-    ui.init(conf_buffer_value);
+    ui.init();
 
     ui.display();
   });
@@ -65,7 +64,7 @@ int main() {
     auto buffer = triple_buffer.producer_buffer();
     auto values = reinterpret_cast<float *>(buffer);
 
-    for (size_t i = 0; i < conf_buffer_value.x * conf_buffer_value.y; ++i) {
+    for (size_t i = 0; i < x * y; ++i) {
       values[i] = dist(mtrand);
     }
 

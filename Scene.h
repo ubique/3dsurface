@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 
 #include "Camera.h"
-#include "ConfBuffer.h"
 #include "Grid.h"
 
 namespace xyz {
@@ -21,7 +20,7 @@ public:
   Scene &operator=(const Scene &) = delete;
   Scene &operator=(Scene &&) = default;
 
-  void init(GLFWwindow *window, const ConfBufferValue &conf_buffer_value);
+  void init(GLFWwindow *window);
   void display(GLFWwindow *window, float *values);
 
 private:
@@ -46,7 +45,6 @@ private:
   ;
   float yaw_{0.0f};
   Camera camera_;
-  ConfBuffer conf_buffer_;
   std::vector<GLuint> vao_;
   Grid grid_;
 };

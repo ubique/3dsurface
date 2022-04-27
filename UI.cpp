@@ -17,7 +17,7 @@ UI::~UI() {
   }
 }
 
-void UI::init(const ConfBufferValue &conf_buffer_value) {
+void UI::init() {
   assert(!window_);
 
   glfwInit();
@@ -26,7 +26,7 @@ void UI::init(const ConfBufferValue &conf_buffer_value) {
   glfwMakeContextCurrent(window_);
   gl3wInit();
 
-  scene_.init(window_, conf_buffer_value);
+  scene_.init(window_);
 }
 
 void UI::display() {

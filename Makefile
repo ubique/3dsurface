@@ -2,17 +2,14 @@ CXX = c++
 CXXFLAGS = -fsanitize=address -std=c++17 -O0 -msse4.1 -g3 -Wall
 LDFLAGS = -fsanitize=address -lglfw -lGLEW -ldl -lpthread
 
-3dsurface: gl3w.o main.o ConfBuffer.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o
-	$(CXX) -o 3dsurface gl3w.o main.o ConfBuffer.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o $(LDFLAGS)
+3dsurface: gl3w.o main.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o
+	$(CXX) -o 3dsurface gl3w.o main.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o $(LDFLAGS)
 
 gl3w.o: gl3w.c
 	$(CXX) -c $(CXXFLAGS) gl3w.c
 
 main.o: main.cpp
 	$(CXX) -c $(CXXFLAGS) main.cpp
-
-ConfBuffer.o: ConfBuffer.cpp ConfBuffer.h
-	$(CXX) -c $(CXXFLAGS) ConfBuffer.cpp
 
 TripleBuffer.o: TripleBuffer.cpp TripleBuffer.h
 	$(CXX) -c $(CXXFLAGS) TripleBuffer.cpp

@@ -27,7 +27,7 @@ Scene::~Scene() {
   }
 }
 
-void Scene::init(GLFWwindow *window, const ConfBufferValue &conf_buffer_value) {
+void Scene::init(GLFWwindow *window) {
   glEnable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);
 
@@ -40,7 +40,6 @@ void Scene::init(GLFWwindow *window, const ConfBufferValue &conf_buffer_value) {
                            });
 
   load_shaders();
-  conf_buffer_.init(program_, conf_buffer_value);
 
   glUseProgram(program_);
 
