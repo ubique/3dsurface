@@ -27,7 +27,7 @@ private:
   TripleBuffer *triple_buffer_;
   Scene scene_;
   GLFWwindow *window_{nullptr};
-  std::atomic<bool> stopped_;
+  std::atomic<bool> stopped_{false};
 };
 
 } // namespace xyz

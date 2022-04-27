@@ -65,7 +65,7 @@ void Grid::init(GLuint *array) {
     float z = z_base;
 
     for (size_t j = 0; j < j_; ++j) {
-      const size_t index = (i * i_ + j) * TrianglesInPyramide;
+      const size_t index = (i * j_ + j) * TrianglesInPyramide;
 
       vertices_[index + 0][0] = {x, y_base, z};
       vertices_[index + 0][1] = {x + width, y_base, z};
@@ -124,9 +124,9 @@ void Grid::init(GLuint *array) {
 void Grid::display(float *values) {
   for (size_t i = 0; i < i_; ++i) {
     for (size_t j = 0; j < j_; ++j) {
-      const size_t index = (i * i_ + j) * TrianglesInPyramide;
+      const size_t index = (i * j_ + j) * TrianglesInPyramide;
 
-      const float value = values[i * i_ + j];
+      const float value = values[i * j_ + j];
       const float nvalue =
           std::clamp(static_cast<int>(floor(value / 0.1f)), 0, 9);
 

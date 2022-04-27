@@ -123,7 +123,8 @@ void Scene::read_mouse(GLFWwindow *window) {
 
   Vec4F to(cos(yaw_ * M_PI / 180.0f) * cos(pitch_ * M_PI / 180.0f),
            sin(pitch_ * M_PI / 180.0f),
-           sin(yaw_ * M_PI / 180.0f) + cos(pitch_ * M_PI / 180.0f), 0.0f);
+           sin(yaw_ * M_PI / 180.0f) * cos(pitch_ * M_PI / 180.0f), 0.0f);
+
 
   to_ = normalise(to);
 }

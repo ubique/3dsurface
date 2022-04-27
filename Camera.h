@@ -27,8 +27,8 @@ private:
 
 private:
   float fovy_{90.0f};
-  float near_{0.5f};
-  float far_{3.0f};
+  float near_{1.0f};
+  float far_{10.0f};
   Vec4F from_;
   Vec4F to_;
   Vec4F forward_;
