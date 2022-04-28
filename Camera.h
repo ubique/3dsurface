@@ -12,7 +12,7 @@ public:
 
   void set_fov(double fov) {
     fov_ = fov;
-    compute_projection ();
+    compute_projection();
   }
   void look_at(Vec4F from, Vec4F to);
 

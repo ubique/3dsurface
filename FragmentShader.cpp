@@ -9,12 +9,14 @@ namespace {
 const GLchar *kSrc = R"tag(
 #version 450 core
 
+uniform vec4 ambient;
+
 in vec4 vs_color;
-out vec4 fColor;
+out vec4 f_color;
 
 void main()
 {
-    fColor = vs_color;
+    f_color = min(vs_color * ambient, vec4(1.0));
 }
 )tag";
 

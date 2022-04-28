@@ -39,10 +39,11 @@ void Scene::init(GLFWwindow *window) {
                              G_x_pos = xpos;
                              G_y_pos = ypos;
                            });
-  glfwSetScrollCallback(window, [](GLFWwindow *window, double xoffset, double yoffset) {
-	G_fov -= yoffset;
-	G_fov = std::clamp(G_fov, 1.0, 90.0);
-  });
+  glfwSetScrollCallback(window,
+                        [](GLFWwindow *window, double xoffset, double yoffset) {
+                          G_fov -= yoffset;
+                          G_fov = std::clamp(G_fov, 1.0, 90.0);
+                        });
 
   load_shaders();
 
@@ -53,6 +54,9 @@ void Scene::init(GLFWwindow *window) {
 
   m_view_ = glGetUniformLocation(program_, "m_view");
   m_proj_ = glGetUniformLocation(program_, "m_proj");
+  ambient_ = glGetUniformLocation(program_, "ambient");
+
+  glUniform4f(ambient_, 1.0f, 1.0f, 1.0f, 1.0f);
 
   last_time_ = glfwGetTime();
 }
@@ -130,7 +134,6 @@ void Scene::read_mouse(GLFWwindow *window) {
   Vec4F to(cos(yaw_ * M_PI / 180.0f) * cos(pitch_ * M_PI / 180.0f),
            sin(pitch_ * M_PI / 180.0f),
            sin(yaw_ * M_PI / 180.0f) * cos(pitch_ * M_PI / 180.0f), 0.0f);
-
 
   to_ = normalise(to);
 }

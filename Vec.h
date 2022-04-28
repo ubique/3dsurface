@@ -20,7 +20,7 @@ public:
   Vec4F(float x, float y, float z, float w) {
     values_ = _mm_setr_ps(x, y, z, w);
   }
-  Vec4F(float (&values)[4]) { values_ = _mm_load_ps(values); }
+  Vec4F(float *values) { values_ = _mm_load_ps(values); }
 
   Vec4F &operator-=(const Vec4F &other) {
     assert(IS_ALIGNED(&values_, 16));
@@ -47,7 +47,7 @@ public:
     return 15 == _mm_movemask_ps(_mm_cmpeq_ps(values_, other.values_));
   }
 
-  void storeu(float (&values)[4]) const { _mm_storeu_ps(values, values_); }
+  void storeu(float *values) const { _mm_store_ps(values, values_); }
 
   float operator[](size_t i) const {
     assert(0 <= i && i <= 3);
@@ -88,6 +88,8 @@ public:
         _mm_div_ps(values_, _mm_sqrt_ps(_mm_dp_ps(values_, values_, 0x7f)));
   }
 
+  void normalize() { normalise(); }
+
   void negate() { values_ = _mm_sub_ps(_mm_setzero_ps(), values_); }
 
 private:
@@ -115,6 +117,12 @@ static inline Vec4F operator*(float v, Vec4F x) { return x.as_native() * v; }
 
 static inline Vec4F normalise(Vec4F x) {
   x.normalise();
+
+  return x;
+}
+
+static inline Vec4F normalize(Vec4F x) {
+  x.normalize();
 
   return x;
 }

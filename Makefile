@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS = -fsanitize=address -std=c++17 -O0 -msse4.1 -g3 -Wall
+CXXFLAGS = -fsanitize=address -std=c++17 -O3 -msse4.1 -g3 -Wall
 LDFLAGS = -fsanitize=address -lglfw -lGLEW -ldl -lpthread
 
 3dsurface: gl3w.o main.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o Values.o
