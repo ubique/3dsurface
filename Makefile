@@ -1,48 +1,42 @@
 CXX = c++
-CXXFLAGS = -fsanitize=address -std=c++17 -O3 -msse4.1 -g3 -Wall
-LDFLAGS = -fsanitize=address -lglfw -lGLEW -ldl -lpthread
+LD = c++
+CXXFLAGS = -std=c++17 -O3 -msse4.1 -g3 -Wall
+LDFLAGS = -lglfw -lGLEW -ldl -lm -lpthread
 
-3dsurface: gl3w.o main.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o Values.o
-	$(CXX) -o 3dsurface gl3w.o main.o TripleBuffer.o VertexShader.o FragmentShader.o Shader.o Grid.o Scene.o Camera.o UI.o Vec.o Mat.o Values.o $(LDFLAGS)
+OBJDIR := objs
+DEPDIR := deps
 
-gl3w.o: gl3w.c
-	$(CXX) -c $(CXXFLAGS) gl3w.c
+BIN := 3dsurface
+SRCS := Camera.cpp FragmentShader.cpp gl3w.c Grid.cpp main.cpp Mat.cpp Scene.cpp Shader.cpp TripleBuffer.cpp UI.cpp Values.cpp Vec.cpp VertexShader.cpp
+OBJS := $(patsubst %,$(OBJDIR)/%.o,$(basename $(SRCS)))
+DEPS := $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS)))
 
-main.o: main.cpp
-	$(CXX) -c $(CXXFLAGS) main.cpp
+$(shell mkdir -p $(dir $(OBJS)) >/dev/null)
+$(shell mkdir -p $(dir $(DEPS)) >/dev/null)
 
-TripleBuffer.o: TripleBuffer.cpp TripleBuffer.h
-	$(CXX) -c $(CXXFLAGS) TripleBuffer.cpp
+DEPFLAGS = -MT $@ -MD -MP -MF $(DEPDIR)/$*.Td
 
-VertexShader.o: VertexShader.cpp VertexShader.h
-	$(CXX) -c $(CXXFLAGS) VertexShader.cpp
+COMPILE.cpp = $(CXX) $(DEPFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c -o $@
+LINK.o = $(LD) -o $@ $^ $(LDFLAGS)
 
-FragmentShader.o: FragmentShader.cpp FragmentShader.h
-	$(CXX) -c $(CXXFLAGS) FragmentShader.cpp
+all: $(BIN)
 
-Shader.o: Shader.cpp Shader.h
-	$(CXX) -c $(CXXFLAGS) Shader.cpp
-
-Grid.o: Grid.cpp Grid.h
-	$(CXX) -c $(CXXFLAGS) Grid.cpp
-
-Scene.o: Scene.cpp Scene.h
-	$(CXX) -c $(CXXFLAGS) Scene.cpp
-
-Camera.o: Camera.cpp Camera.h
-	$(CXX) -c $(CXXFLAGS) Camera.cpp
-
-UI.o: UI.cpp UI.h
-	$(CXX) -c $(CXXFLAGS) UI.cpp
-
-Vec.o: Vec.cpp Vec.h
-	$(CXX) -c $(CXXFLAGS) Vec.cpp
-
-Mat.o: Mat.cpp Mat.h
-	$(CXX) -c $(CXXFLAGS) Mat.cpp
-
-Values.o: Values.cpp Values.h
-	$(CXX) -c $(CXXFLAGS) Values.cpp
-
+.PHONY: clean
 clean:
-	rm -f *.o 3dsurface
+	rm -rf $(OBJDIR) $(DEPDIR) $(BIN)
+
+$(BIN): $(OBJS)
+	$(LINK.o)
+
+$(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c | $(DEPDIR)/%.d
+	$(COMPILE.cpp) $<
+
+$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp | $(DEPDIR)/%.d
+	$(COMPILE.cpp) $<
+
+.PRECIOUS: $(DEPDIR)/%.d
+$(DEPDIR)/%.d: ;
+
+-include $(DEPS)
