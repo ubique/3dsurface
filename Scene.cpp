@@ -31,6 +31,9 @@ Scene::~Scene() {
 void Scene::init(GLFWwindow *window) {
   glEnable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LINE_SMOOTH);
+  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   glGenVertexArrays(vao_.size(), vao_.data());
 
@@ -56,7 +59,7 @@ void Scene::init(GLFWwindow *window) {
   m_proj_ = glGetUniformLocation(program_, "m_proj");
   ambient_ = glGetUniformLocation(program_, "ambient");
 
-  glUniform4f(ambient_, 1.0f, 1.0f, 1.0f, 1.0f);
+  glUniform4f(ambient_, 0.8f, 0.8f, 0.8f, 1.0f);
 
   last_time_ = glfwGetTime();
 }

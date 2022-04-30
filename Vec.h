@@ -18,9 +18,9 @@ public:
   Vec4F(__m128 values) : values_(values) {}
   Vec4F(float x, float y, float z) : Vec4F(x, y, z, 1.0f) {}
   Vec4F(float x, float y, float z, float w) {
-    values_ = _mm_setr_ps(x, y, z, w);
+    setr (x, y, z, w);
   }
-  Vec4F(float *values) { values_ = _mm_load_ps(values); }
+  Vec4F(float *values) { load (values); }
 
   Vec4F &operator-=(const Vec4F &other) {
     assert(IS_ALIGNED(&values_, 16));
@@ -47,13 +47,18 @@ public:
     return 15 == _mm_movemask_ps(_mm_cmpeq_ps(values_, other.values_));
   }
 
-  void storeu(float *values) const { _mm_store_ps(values, values_); }
+  void setr(float x, float y, float z, float w) {
+    values_ = _mm_setr_ps(x, y, z, w);
+  }
+
+  void load(float *values) { values_ = _mm_load_ps (values); }
+  void store(float *values) const { _mm_store_ps(values, values_); }
 
   float operator[](size_t i) const {
     assert(0 <= i && i <= 3);
 
     float values[4];
-    storeu(values);
+    store(values);
 
     return values[i];
   }

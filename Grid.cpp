@@ -152,6 +152,7 @@ const std::array<std::array<float, 4>, 128> CLUT = {{
 Grid::Grid(size_t i, size_t j) : i_(i), j_(j) {
   vertices_.resize(i_ * j_ * TrianglesInPyramide);
   colors_.resize(i_ * j_ * TrianglesInPyramide);
+  normals_.resize(i_ * j_ * TrianglesInPyramide);
   buffers_.resize(NumBuffers, 0);
 }
 
@@ -169,6 +170,7 @@ Grid &Grid::operator=(Grid &&other) {
   buffers_ = std::move(other.buffers_);
   vertices_ = std::move(other.vertices_);
   colors_ = std::move(other.colors_);
+  normals_.resize(i_ * j_ * TrianglesInPyramide);
 
   return *this;
 }
@@ -185,21 +187,55 @@ void Grid::init(GLuint *array) {
     for (size_t j = 0; j < j_; ++j) {
       const size_t index = (i * j_ + j) * TrianglesInPyramide;
 
-      vertices_[index + 0][0] = {x, y_base, z};
-      vertices_[index + 0][1] = {x + width, y_base, z};
-      vertices_[index + 0][2] = {x + hwidth, y_base + height, z + hwidth};
+      Vec4F v0, v1, v2;
 
-      vertices_[index + 1][0] = {x + width, y_base, z};
-      vertices_[index + 1][1] = {x + width, y_base, z + width};
-      vertices_[index + 1][2] = {x + hwidth, y_base + height, z + hwidth};
+      v0.setr (x, y_base, z, 1.0f);
+      v1.setr (x + width, y_base, z, 1.0f);
+      v2.setr (x + hwidth, y_base + height, z + hwidth, 1.0f);
 
-      vertices_[index + 2][0] = {x, y_base, z + width};
-      vertices_[index + 2][1] = {x + width, y_base, z + width};
-      vertices_[index + 2][2] = {x + hwidth, y_base + height, z + hwidth};
+      v0.store(vertices_[index + 0][0].data());
+      v1.store(vertices_[index + 0][1].data());
+      v2.store(vertices_[index + 0][2].data());
 
-      vertices_[index + 3][0] = {x, y_base, z + width};
-      vertices_[index + 3][1] = {x, y_base, z};
-      vertices_[index + 3][2] = {x + hwidth, y_base + height, z + hwidth};
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 0][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 0][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 0][2].data());
+
+      v0.setr (x + width, y_base, z, 1.0f);
+      v1.setr (x + width, y_base, z + width, 1.0f);
+      v2.setr (x + hwidth, y_base + height, z + hwidth, 1.0f);
+
+      v0.store(vertices_[index + 1][0].data());
+      v1.store(vertices_[index + 1][1].data());
+      v2.store(vertices_[index + 1][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 1][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 1][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 1][2].data());
+
+      v0.setr (x, y_base, z + width, 1.0f);
+      v1.setr (x + width, y_base, z + width, 1.0f);
+      v2.setr (x + hwidth, y_base + height, z + hwidth, 1.0f);
+
+      v0.store(vertices_[index + 2][0].data());
+      v1.store(vertices_[index + 2][1].data());
+      v2.store(vertices_[index + 2][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 2][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 2][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 2][2].data());
+
+      v0.setr (x, y_base, z + width, 1.0f);
+      v1.setr (x, y_base, z, 1.0f);
+      v2.setr (x + hwidth, y_base + height, z + hwidth, 1.0f);
+
+      v0.store(vertices_[index + 3][0].data());
+      v1.store(vertices_[index + 3][1].data());
+      v2.store(vertices_[index + 3][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 3][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 3][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 3][2].data());
 
       colors_[index + 0][0] = CLUT[0];
       colors_[index + 0][1] = CLUT[0];
@@ -219,24 +255,32 @@ void Grid::init(GLuint *array) {
 
       z += width;
     }
+
     x += width;
   }
 
   glCreateBuffers(buffers_.size(), buffers_.data());
 
-  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(VertexBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[VertexBuffer]);
   glBufferData(GL_ARRAY_BUFFER,
                i_ * j_ * TrianglesInPyramide * sizeof(TriangleVertices),
                vertices_.data(), GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(0, VertexComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glVertexAttribPointer(VertexBuffer, VertexComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(ColorBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[ColorBuffer]);
   glBufferData(GL_ARRAY_BUFFER,
                i_ * j_ * TrianglesInPyramide * sizeof(TriangleColors),
                colors_.data(), GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(1, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glVertexAttribPointer(ColorBuffer, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glEnableVertexAttribArray(NormalBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers_[NormalBuffer]);
+  glBufferData(GL_ARRAY_BUFFER,
+               i_ * j_ * TrianglesInPyramide * sizeof(TriangleNormals),
+               normals_.data(), GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(NormalBuffer, NormalComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 void Grid::display(float *values) {
@@ -249,10 +293,50 @@ void Grid::display(float *values) {
           std::clamp(static_cast<int>(floor(value * CLUT.size())), 0,
                      static_cast<int>(CLUT.size() - 1));
 
+      Vec4F v0, v1, v2;
+
       vertices_[index + 0][2][1] = y_base + value;
+
+      v0.load (vertices_[index + 0][0].data());
+      v1.load (vertices_[index + 0][1].data());
+      v2.load (vertices_[index + 0][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 0][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 0][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 0][2].data());
+
+
       vertices_[index + 1][2][1] = y_base + value;
+
+      v0.load (vertices_[index + 1][0].data());
+      v1.load (vertices_[index + 1][1].data());
+      v2.load (vertices_[index + 1][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 1][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 1][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 1][2].data());
+
+
       vertices_[index + 2][2][1] = y_base + value;
+
+      v0.load (vertices_[index + 2][0].data());
+      v1.load (vertices_[index + 2][1].data());
+      v2.load (vertices_[index + 2][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 2][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 2][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 2][2].data());
+
+
       vertices_[index + 3][2][1] = y_base + value;
+
+      v0.load (vertices_[index + 3][0].data());
+      v1.load (vertices_[index + 3][1].data());
+      v2.load (vertices_[index + 3][2].data());
+
+      normalise(cross(v0 - v2, v1 - v0)).store(normals_[index + 3][0].data());
+      normalise(cross(v1 - v0, v2 - v1)).store(normals_[index + 3][1].data());
+      normalise(cross(v2 - v1, v0 - v2)).store(normals_[index + 3][2].data());
 
       colors_[index + 0][2] = CLUT[nvalue];
       colors_[index + 1][2] = CLUT[nvalue];
@@ -261,19 +345,26 @@ void Grid::display(float *values) {
     }
   }
 
-  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(VertexBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[VertexBuffer]);
   glBufferData(GL_ARRAY_BUFFER,
                i_ * j_ * TrianglesInPyramide * sizeof(TriangleVertices),
                vertices_.data(), GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(0, VertexComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glVertexAttribPointer(VertexBuffer, VertexComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(ColorBuffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffers_[ColorBuffer]);
   glBufferData(GL_ARRAY_BUFFER,
                i_ * j_ * TrianglesInPyramide * sizeof(TriangleColors),
                colors_.data(), GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(1, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glVertexAttribPointer(ColorBuffer, ColorComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  glEnableVertexAttribArray(NormalBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers_[NormalBuffer]);
+  glBufferData(GL_ARRAY_BUFFER,
+               i_ * j_ * TrianglesInPyramide * sizeof(TriangleNormals),
+               normals_.data(), GL_DYNAMIC_DRAW);
+  glVertexAttribPointer(NormalBuffer, NormalComponents, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 size_t Grid::num_vertices() const {

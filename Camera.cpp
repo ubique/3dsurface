@@ -42,17 +42,17 @@ void Camera::look_at(Vec4F from, Vec4F to) {
   cam_to_world_.transpose();
 
   alignas(16) float right_values[4];
-  right_.storeu(right_values);
+  right_.store(right_values);
   right_values[3] = -dot(right_, from_);
 
   alignas(16) float up_values[4];
-  up_.storeu(up_values);
+  up_.store(up_values);
   up_values[3] = -dot(up_, from_);
 
   auto forward = forward_;
   forward.negate();
   alignas(16) float forward_values[4];
-  forward.storeu(forward_values);
+  forward.store(forward_values);
   forward_values[3] = -dot(forward, from_);
 
   world_to_cam_ =
@@ -67,11 +67,18 @@ void Camera::compute_projection() {
   const auto t = scale;
   const auto b = -t;
 
+#if 1
   Vec4F row_0(2.0f * near_ * (r - l), 0.0f, (r + l) / (r - l), 0.0f);
   Vec4F row_1(0.0f, 2.0f * near_ / (t - b), (t + b) / (t - b), 0.0f);
   Vec4F row_2(0.0f, 0.0f, -(far_ + near_) / (far_ - near_),
               -2.0f * far_ * near_ / (far_ - near_));
   Vec4F row_3(0.0f, 0.0f, -1.0f, 0.0f);
+#else
+  Vec4F row_0(2.0f * (r - l), 0.0f, 0.0f, -(r + l)/(r - l));
+  Vec4F row_1(0.0f, 2.0f / (t - b), 0.0f, -(t + b) / (t - b));
+  Vec4F row_2(0.0f, 0.0f, -(2.0f) / (far_ - near_), -(far_ + near_) / (far_ - near_));
+  Vec4F row_3(0.0f, 0.0f, 0.0f, 1.0f);
+#endif
 
   m_projection_ = Mat44F(row_0, row_1, row_2, row_3);
 }
